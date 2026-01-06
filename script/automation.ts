@@ -3,6 +3,7 @@
 import { scheduleCronJob } from '../lib/cores/cron';
 import { cronExpression } from '../constants';
 import { getTimeFromDate } from '../lib/cores/date';
+import { turnOn } from '../lib/cores/shelly';
 
 // Function
 
@@ -21,9 +22,23 @@ async function runAutomation(runAt: Date) {
         console.log('Time:', time.data);
 
         if(time.data === '10:00'){
+
             console.log('Turning on the lazy spa');
+
+            const result = await turnOn(true);
+            if (!result.status || !result.data) {
+                console.error(result.message);
+            }
+            
         } else if(time.data === '22:00'){
+
             console.log('Turning off the lazy spa');
+
+            const result = await turnOn(false);
+            if (!result.status || !result.data) {
+                console.error(result.message);
+            }
+
         } else {
             console.log('Invalid time:', time.data);
         }
