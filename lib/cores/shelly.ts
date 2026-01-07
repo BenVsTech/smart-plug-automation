@@ -12,15 +12,14 @@ dotenv.config();
 
 const shellyCloudUrl = process.env.SHELLY_CLOUD_URL;
 const shellyAuthToken = process.env.SHELLY_AUTH_TOKEN;
-const shellyDeviceId = process.env.SHELLY_DEVICE_ID;
 
-if (!shellyCloudUrl || !shellyAuthToken || !shellyDeviceId) {
+if (!shellyCloudUrl || !shellyAuthToken) {
     throw new Error('Missing environment variables');
 }
 
 // Exports
 
-export async function turnOn(on: boolean): Promise<DefaultReturnObject<boolean>> {
+export async function turnOn(on: boolean, deviceId: string ): Promise<DefaultReturnObject<boolean>> {
     try{
 
         const response = await axios.post<{ id: number, method: string, params: { id: number, on: boolean }, target: { type: string, id: string } }>(
@@ -34,7 +33,7 @@ export async function turnOn(on: boolean): Promise<DefaultReturnObject<boolean>>
                 },
                 target: {
                     type: 'device',
-                    id: shellyDeviceId,
+                    id: deviceId,
                 },
             },
             {

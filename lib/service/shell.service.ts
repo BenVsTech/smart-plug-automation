@@ -1,14 +1,35 @@
 // Imports
 
+import dotenv from 'dotenv';
 import { DefaultReturnObject } from '../../types';
 import { getTimeFromDate } from '../cores/date';
 import { turnOn } from '../cores/shelly';
 import { timesToSwitch } from '../../constants';
 
+// Load environment variables
+
+dotenv.config();
+
+// Environment variables
+
+const lazySpaDeviceId = process.env.SHELLY_LAZY_SPA_DEVICE_ID;
+
+if (!lazySpaDeviceId) {
+    throw new Error('Missing environment variables');
+}
+
 // Exports
 
 export async function switchLazySpa(runAt: Date): Promise<DefaultReturnObject<boolean>> {
     try{
+
+        if (!lazySpaDeviceId) {
+            return {
+                status: false,
+                data: false,
+                message: 'Missing Device ID'
+            }
+        }
 
         const time = await getTimeFromDate(runAt);
         if (!time.status || !time.data) {
@@ -21,7 +42,7 @@ export async function switchLazySpa(runAt: Date): Promise<DefaultReturnObject<bo
 
         if(time.data === timesToSwitch.lazySpa.on){
 
-            const result = await turnOn(true);
+            const result = await turnOn(true, lazySpaDeviceId);
             if (!result.status || !result.data) {
                 return {
                     status: false,
@@ -32,7 +53,7 @@ export async function switchLazySpa(runAt: Date): Promise<DefaultReturnObject<bo
             
         } else if(time.data === timesToSwitch.lazySpa.off){
 
-            const result = await turnOn(false);
+            const result = await turnOn(false, lazySpaDeviceId);
             if (!result.status || !result.data) {
                 return {
                     status: false,

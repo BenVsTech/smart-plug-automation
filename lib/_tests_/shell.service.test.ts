@@ -9,15 +9,28 @@ import { turnOn } from '../cores/shelly';
 
 jest.mock('../cores/date');
 jest.mock('../cores/shelly');
-
 const mockGetTimeFromDate = getTimeFromDate as jest.MockedFunction<typeof getTimeFromDate>;
 const mockTurnOn = turnOn as jest.MockedFunction<typeof turnOn>;
+
+// Mock environment variable
+
+const TEST_DEVICE_ID = 'test-device-id-123';
 
 // Tests
 
 describe('switchLazySpa', () => {
+    const originalEnv = process.env;
+
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env = {
+            ...originalEnv,
+            SHELLY_LAZY_SPA_DEVICE_ID: TEST_DEVICE_ID
+        };
+    });
+
+    afterEach(() => {
+        process.env = originalEnv;
     });
 
     it('should turn on the lazy spa when time matches on time', async () => {
@@ -38,7 +51,7 @@ describe('switchLazySpa', () => {
         expect(result.status).toBe(true);
         expect(result.data).toBe(true);
         expect(mockGetTimeFromDate).toHaveBeenCalledWith(testDate);
-        expect(mockTurnOn).toHaveBeenCalledWith(true);
+        expect(mockTurnOn).toHaveBeenCalledWith(true, TEST_DEVICE_ID);
         expect(result.message).toContain('turned on');
     });
 
@@ -60,7 +73,7 @@ describe('switchLazySpa', () => {
         expect(result.status).toBe(true);
         expect(result.data).toBe(true);
         expect(mockGetTimeFromDate).toHaveBeenCalledWith(testDate);
-        expect(mockTurnOn).toHaveBeenCalledWith(false);
+        expect(mockTurnOn).toHaveBeenCalledWith(false, TEST_DEVICE_ID);
         expect(result.message).toContain('turned off');
     });
 
@@ -114,7 +127,7 @@ describe('switchLazySpa', () => {
         expect(result.status).toBe(false);
         expect(result.data).toBe(false);
         expect(result.message).toBe('Failed to turn on device');
-        expect(mockTurnOn).toHaveBeenCalledWith(true);
+        expect(mockTurnOn).toHaveBeenCalledWith(true, TEST_DEVICE_ID);
     });
 
     it('should return error when turnOn fails for off operation', async () => {
@@ -135,7 +148,7 @@ describe('switchLazySpa', () => {
         expect(result.status).toBe(false);
         expect(result.data).toBe(false);
         expect(result.message).toBe('Failed to turn off device');
-        expect(mockTurnOn).toHaveBeenCalledWith(false);
+        expect(mockTurnOn).toHaveBeenCalledWith(false, TEST_DEVICE_ID);
     });
 
     it('should return error when turnOn returns no data for on operation', async () => {
