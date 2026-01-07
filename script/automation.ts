@@ -2,45 +2,16 @@
 
 import { scheduleCronJob } from '../lib/cores/cron';
 import { cronExpression } from '../constants';
-import { getTimeFromDate } from '../lib/cores/date';
-import { turnOn } from '../lib/cores/shelly';
+import { switchLazySpa } from '../lib/service/shell.service';
 
 // Function
 
 async function runAutomation(runAt: Date) {
     try{
 
-        console.log('Automation started');
-        console.log('Running at:', runAt);
-
-        const time = await getTimeFromDate(runAt);
-        if (!time.status || !time.data) {
-            console.error(time.message);
-            return;
-        }
-
-        console.log('Time:', time.data);
-
-        if(time.data === '10:00'){
-
-            console.log('Turning on the lazy spa');
-
-            const result = await turnOn(true);
-            if (!result.status || !result.data) {
-                console.error(result.message);
-            }
-            
-        } else if(time.data === '22:00'){
-
-            console.log('Turning off the lazy spa');
-
-            const result = await turnOn(false);
-            if (!result.status || !result.data) {
-                console.error(result.message);
-            }
-
-        } else {
-            console.log('Invalid time:', time.data);
+        const result = await switchLazySpa(runAt);
+        if (!result.status || !result.data) {
+            console.error(result.message);
         }
 
     } catch (error) {
